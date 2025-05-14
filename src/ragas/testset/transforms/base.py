@@ -10,6 +10,8 @@ from ragas.llms import BaseRagasLLM, llm_factory
 from ragas.prompt import PromptMixin
 from ragas.testset.graph import KnowledgeGraph, Node, Relationship
 
+from langchain_core.callbacks import Callbacks
+
 DEFAULT_TOKENIZER = tiktoken.get_encoding("o200k_base")
 
 logger = logging.getLogger(__name__)
@@ -195,6 +197,7 @@ class LLMBasedExtractor(Extractor, PromptMixin):
     merge_if_possible: bool = True
     max_token_limit: int = 32000
     tokenizer: Encoding = DEFAULT_TOKENIZER
+    callbacks: t.Optional[Callbacks] = None
 
     def split_text_by_token_limit(self, text, max_token_limit):
 

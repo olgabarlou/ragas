@@ -177,7 +177,7 @@ class SummaryExtractor(LLMBasedExtractor):
         if node_text is None:
             return self.property_name, None
         chunks = self.split_text_by_token_limit(node_text, self.max_token_limit)
-        result = await self.prompt.generate(self.llm, data=StringIO(text=chunks[0]))
+        result = await self.prompt.generate(self.llm, data=StringIO(text=chunks[0]), callbacks=self.callbacks)
         return self.property_name, result.text
 
 
@@ -206,7 +206,7 @@ class KeyphrasesExtractor(LLMBasedExtractor):
         keyphrases = []
         for chunk in chunks:
             result = await self.prompt.generate(
-                self.llm, data=TextWithExtractionLimit(text=chunk, max_num=self.max_num)
+                self.llm, data=TextWithExtractionLimit(text=chunk, max_num=self.max_num), callbacks=self.callbacks
             )
             keyphrases.extend(result.keyphrases)
         return self.property_name, keyphrases
@@ -233,7 +233,7 @@ class TitleExtractor(LLMBasedExtractor):
         if node_text is None:
             return self.property_name, None
         chunks = self.split_text_by_token_limit(node_text, self.max_token_limit)
-        result = await self.prompt.generate(self.llm, data=StringIO(text=chunks[0]))
+        result = await self.prompt.generate(self.llm, data=StringIO(text=chunks[0]), callbacks=self.callbacks)
         return self.property_name, result.text
 
 
@@ -262,7 +262,7 @@ class HeadlinesExtractor(LLMBasedExtractor):
         headlines = []
         for chunk in chunks:
             result = await self.prompt.generate(
-                self.llm, data=TextWithExtractionLimit(text=chunk, max_num=self.max_num)
+                self.llm, data=TextWithExtractionLimit(text=chunk, max_num=self.max_num), callbacks=self.callbacks
             )
             if result:
                 headlines.extend(result.headlines)
@@ -296,6 +296,7 @@ class NERExtractor(LLMBasedExtractor):
             result = await self.prompt.generate(
                 self.llm,
                 data=TextWithExtractionLimit(text=chunk, max_num=self.max_num_entities),
+                callbacks=self.callbacks,
             )
             entities.extend(result.entities)
         return self.property_name, entities
@@ -344,7 +345,7 @@ class TopicDescriptionExtractor(LLMBasedExtractor):
         if node_text is None:
             return self.property_name, None
         chunks = self.split_text_by_token_limit(node_text, self.max_token_limit)
-        result = await self.prompt.generate(self.llm, data=StringIO(text=chunks[0]))
+        result = await self.prompt.generate(self.llm, data=StringIO(text=chunks[0]), callbacks=self.callbacks)
         return self.property_name, result.description
 
 
@@ -405,6 +406,7 @@ class ThemesExtractor(LLMBasedExtractor):
             result = await self.prompt.generate(
                 self.llm,
                 data=TextWithExtractionLimit(text=chunk, max_num=self.max_num_themes),
+                callbacks=self.callbacks,
             )
             themes.extend(result.output)
 

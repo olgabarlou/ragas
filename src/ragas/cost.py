@@ -133,7 +133,25 @@ class CostCallbackHandler(BaseCallbackHandler):
         self.usage_data: t.List[TokenUsage] = []
 
     def on_llm_end(self, response: LLMResult, **kwargs: t.Any):
+        logger.debug(f"on_llm_end called with response: {response}")
         self.usage_data.append(self.token_usage_parser(response))
+
+    def on_success(self, result: t.Any):
+        logger.debug(f"on_success called with result: {result}")
+        if isinstance(result, LLMResult):
+            logger.debug("Skipping duplicate token usage append in on_success.")
+        else:
+            logger.info(f"Successful result: {result}")
+
+    def on_error(self, error: Exception):
+        logger.error(f"CostCallbackHandler encountered an error: {error}")
+
+    
+    def on_error(self, error: Exception):
+        """
+        Handle errors during the transformation process.
+        """
+        logger.error(f"CostCallbackHandler encountered an error: {error}")
 
     def total_cost(
         self,

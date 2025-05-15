@@ -83,5 +83,5 @@ class CustomNodeFilter(LLMBasedNodeFilter):
             node_content=node.properties.get("page_content", ""),
             rubrics=self.rubrics,
         )
-        response = await self.scoring_prompt.generate(data=prompt_input, llm=self.llm)
+        response = await self.scoring_prompt.generate(data=prompt_input, llm=self.llm, callbacks=self.callbacks)
         return response.score <= self.min_score

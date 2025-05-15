@@ -397,3 +397,4 @@ class NodeFilter(BaseGraphTransformation):
 @dataclass
 class LLMBasedNodeFilter(NodeFilter, PromptMixin):
     llm: BaseRagasLLM = field(default_factory=llm_factory)
+    callbacks: t.Optional[Callbacks] = None

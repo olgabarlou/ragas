@@ -1,3 +1,7 @@
+#### Contribution to the initial repository is transforms cost calculation, however the cost for the EmbeddingExtractor has not been implemented.
+
+----------
+
 <h1 align="center">
   <img style="vertical-align:middle" height="200"
   src="./docs/_static/imgs/logo.png">

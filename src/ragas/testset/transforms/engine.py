@@ -10,6 +10,7 @@ from ragas.executor import as_completed, is_event_loop_running
 from ragas.run_config import RunConfig
 from ragas.testset.graph import KnowledgeGraph
 from ragas.testset.transforms.base import BaseGraphTransformation
+from ragas.cost import TokenUsageParser
 
 if t.TYPE_CHECKING:
     from langchain_core.callbacks import Callbacks
@@ -101,21 +102,23 @@ def apply_transforms(
     transforms: Transforms,
     run_config: RunConfig = RunConfig(),
     callbacks: t.Optional[Callbacks] = None,
-    cost_per_input_token: float = 0.01,
-    cost_per_output_token: float = 0.02,
-):
+    token_usage_parser: t.Optional[TokenUsageParser] = None,
+) -> t.Optional[CostCallbackHandler]:
     """
     Apply a list of transformations to a knowledge graph in place and estimate the cost.
     """
     # Initialize callbacks if not provided
     callbacks = callbacks or []
     
-    # Add a cost callback handler for tracking token usage
-    cost_cb = CostCallbackHandler(token_usage_parser=get_token_usage_for_openai)
+    if token_usage_parser is not None:
+        # Add a cost callback handler for tracking token usage
+        cost_cb = CostCallbackHandler(token_usage_parser=get_token_usage_for_openai)
     
-    # Add the cost callback to the callbacks list
-    if isinstance(callbacks, list):
-        callbacks.append(cost_cb)
+        # Add the cost callback to the callbacks list
+        if isinstance(callbacks, list):
+            callbacks.append(cost_cb)
+    else:
+        cost_cb = None
     
     # Apply nest_asyncio to fix the event loop issue in Jupyter
     apply_nest_asyncio()
@@ -169,22 +172,7 @@ def apply_transforms(
             f"Invalid transforms type: {type(transforms)}. Expects a list of BaseGraphTransformations or a Parallel instance."
         )
     
-    # Calculate and return the total cost
-    # Check if we have any token usage data
-    if not hasattr(cost_cb, 'usage_data') or not cost_cb.usage_data:
-        # If no usage data, return a default minimal cost or 0
-        logger.warning("No token usage data was collected. Cost may be underestimated.")
-        return 0.0
-    
-    try:
-        total_cost = cost_cb.total_cost(
-            cost_per_input_token=cost_per_input_token,
-            cost_per_output_token=cost_per_output_token,
-        )
-        return total_cost
-    except Exception as e:
-        logger.error(f"Error calculating total cost: {e}")
-        return 0.0
+    return cost_cb
     
 def rollback_transforms(kg: KnowledgeGraph, transforms: Transforms):
     """
